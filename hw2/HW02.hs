@@ -63,3 +63,15 @@ bestWordsHelper (h:t) acc | (scrabbleValueWord h == scrabbleValueWord (head acc)
 
 bestWords :: [String] -> [String]
 bestWords s = bestWordsHelper s []
+
+scrabbleValueTemplateHelper :: [(Char,Char)] -> Int -> Int -> Int
+scrabbleValueTemplateHelper [] acc_letter acc_word = acc_letter * acc_word
+scrabbleValueTemplateHelper (('D',letter):t) acc_letter acc_word = scrabbleValueTemplateHelper t (acc_letter + (2 * scrabbleValue letter)) acc_word
+scrabbleValueTemplateHelper (('T',letter):t) acc_letter acc_word = scrabbleValueTemplateHelper t (acc_letter + (3 * scrabbleValue letter)) acc_word
+scrabbleValueTemplateHelper (('2',letter):t) acc_letter acc_word = scrabbleValueTemplateHelper t (acc_letter + (scrabbleValue letter)) (2 * acc_word)
+scrabbleValueTemplateHelper (('3',letter):t) acc_letter acc_word = scrabbleValueTemplateHelper t (acc_letter + (scrabbleValue letter)) (3 * acc_word)
+scrabbleValueTemplateHelper ((_,letter):t) acc_letter acc_word = scrabbleValueTemplateHelper t (acc_letter + (scrabbleValue letter)) acc_word
+
+
+scrabbleValueTemplate :: STemplate -> String -> Int
+scrabbleValueTemplate stemp st = scrabbleValueTemplateHelper (zip stemp st) 0 1  
