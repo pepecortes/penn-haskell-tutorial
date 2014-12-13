@@ -28,5 +28,8 @@ prop_bestWords1 = bestWords (wordsFittingTemplate "??r?" ['c','x','e','a','b','c
 prop_bestWords2 = bestWords ["cat", "rat", "bat"] == ["bat","cat"]
 prop_bestWords3 = bestWords [] == []
 
+prop_scrabbleValueTemplate1 = scrabbleValueTemplate "?e??3" "peace" == 27
+prop_scrabbleValueTemplate2 = scrabbleValueTemplate "De?2?" "peace" == 24
+prop_scrabbleValueTemplate3 = scrabbleValueTemplate "??Tce" "peace" == 11
 
 main = $(quickCheckAll)
