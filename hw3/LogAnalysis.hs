@@ -1,25 +1,25 @@
 {-# OPTIONS_GHC -Wall #-}
 module LogAnalysis where
 import Log
-import Data.List (sortBy)
-    
+import Data.List
+import Data.Char    
 parseMessage :: String -> MaybeLogMessage
 parseMessage s = case words s of
-  ("I":ts:tail) -> case readInt ts of
-    ValidInt i -> ValidLM (LogMessage Info i (unwords tail))
+  ("I":ts:t) -> case readInt ts of
+    ValidInt i -> ValidLM (LogMessage Info i (unwords t))
     _ -> InvalidLM s
-  ("W":ts:tail) -> case readInt ts of 
-    ValidInt i -> ValidLM (LogMessage Warning i (unwords tail))
+  ("W":ts:t) -> case readInt ts of 
+    ValidInt i -> ValidLM (LogMessage Warning i (unwords t))
     _ -> InvalidLM s
-  ("E":sev:ts:tail) -> case (readInt sev, readInt ts) of
-    (ValidInt i, ValidInt j) -> ValidLM (LogMessage (Error i) j (unwords tail))
+  ("E":sev:ts:t) -> case (readInt sev, readInt ts) of
+    (ValidInt i, ValidInt j) -> ValidLM (LogMessage (Error i) j (unwords t))
     _ -> InvalidLM s
   _ -> InvalidLM s
                                               
 validMessagesOnly :: [MaybeLogMessage] -> [LogMessage]
 validMessagesOnly [] = []
-validMessagesOnly (ValidLM m:tail) = m:validMessagesOnly tail
-validMessagesOnly (_:tail) = validMessagesOnly tail
+validMessagesOnly (ValidLM m:t) = m:validMessagesOnly t
+validMessagesOnly (_:t) = validMessagesOnly t
 
 parse :: String -> [LogMessage]
 parse s = validMessagesOnly (map parseMessage (lines s))
@@ -34,13 +34,24 @@ significantError :: LogMessage -> Bool
 significantError (LogMessage (Error i) _ _)  = (i >= 50)
 significantError _ = False
 
+significantErrorEnhanced :: LogMessage -> String -> Bool
+significantErrorEnhanced lm st = (significantError lm) || (lmContainsString lm st)
+
 getString :: LogMessage -> String
 getString (LogMessage _ _ st) = st
 
 whatWentWrong :: [LogMessage] -> [String]
 whatWentWrong l = map getString (sortMessages (filter significantError l))
 
---lmContainsString :: LogMessage -> String -> Bool
---lmContainsString (LogMessage _ _ st) s =  
+lmContainsString :: LogMessage -> String -> Bool
+lmContainsString (LogMessage _ _ st) s = isInfixOf smin stmin
+  where
+    stmin = map toLower st
+    smin = map toLower s
+    
+messagesAbout :: String -> [LogMessage] -> [LogMessage]
+messagesAbout s lms = filter (`lmContainsString` s) lms
 
---messagesAbout :: String -> [LogMessage] -> [LogMessage]
+whatWentWrongEnhanced :: String -> [LogMessage] -> [String]
+whatWentWrongEnhanced st lms =
+  map getString (sortMessages (filter (`significantErrorEnhanced` st) lms))
