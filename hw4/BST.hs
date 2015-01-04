@@ -49,6 +49,12 @@ insertBST compare e (Node left root right) =
   case (compare e root) of
     LT -> (Node (insertBST compare e left) root right)
     _ -> (Node left root (insertBST compare e right))
+
+insertBST2 :: (a -> a -> Ordering) -> a -> BST a -> BST a
+insertBST2 _ e Leaf = Node Leaf e Leaf
+insertBST2 compare e (Node left root right)
+  | LT <- compare e root = (Node (insertBST compare e left) root right)
+  | otherwise = (Node left root (insertBST compare e right))
  
 
 
