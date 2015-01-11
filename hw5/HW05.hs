@@ -45,8 +45,11 @@ instance Parsable Mat2x2 where
 type I4 = (Integer, Integer, Integer, Integer)
 
 instance Ring Bool where -- see http://en.wikipedia.org/wiki/Boolean_ring
-  addId = True
-  addInv x = True /= x
---  mulId = MkMod 1
-  add x y = x /= (y /= (x && y)) -- /= is XOR !
+  addId = False -- x XOR False = x
+  addInv x = x -- x XOR x = False
+  mulId = True -- x AND True = x
+  add x y = x /= y -- /= is XOR !
   mul x y = x && y
+
+instance Parsable Bool where
+  parse = listToMaybe . reads
